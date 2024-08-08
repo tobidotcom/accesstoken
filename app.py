@@ -11,14 +11,15 @@ def authenticate_and_get_token(client_secrets_file):
     
     creds = None
     try:
-        # Automatic authentication is not suitable for cloud environments like Streamlit Cloud
+        # Provide manual authentication URL and code input
         auth_url, _ = flow.authorization_url(access_type='offline')
         st.write("Please go to this URL to authorize the application:")
         st.write(f"[Authorize Here]({auth_url})")
         auth_code = st.text_input("Enter the authorization code:")
         if auth_code:
             try:
-                creds = flow.fetch_token(code=auth_code)
+                flow.fetch_token(code=auth_code)
+                creds = flow.credentials
             except Exception as e:
                 st.error(f"Failed to fetch token: {e}")
     except Exception as e:
@@ -66,4 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
