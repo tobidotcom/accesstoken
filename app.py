@@ -7,36 +7,37 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
 def authenticate_and_get_token(client_secrets_file):
     """Authenticate the user and get the access token."""
-    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, SCOPES, redirect_uri="https://accesstoken-zo9us8njw6cs8u7qz9n7at.streamlit.app/")
-    
-    creds = None
     try:
-        # Provide manual authentication URL and code input
-        auth_url, _ = flow.authorization_url(access_type='offline')
+        flow = InstalledAppFlow.from_client_secrets_file(
+            client_secrets_file, SCOPES, redirect_uri="https://accesstoken-zo9us8njw6cs8u7qz9n7at.streamlit.app/"
+        )
+        
+        # Generate authorization URL
+        auth_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
         st.write("Please go to this URL to authorize the application:")
         st.write(f"[Authorize Here]({auth_url})")
+
+        # Input field for authorization code
         auth_code = st.text_input("Enter the authorization code:")
         if auth_code:
             try:
                 flow.fetch_token(code=auth_code)
                 creds = flow.credentials
+
+                credentials = {
+                    'token': creds.token,
+                    'refresh_token': creds.refresh_token,
+                    'token_uri': creds.token_uri,
+                    'client_id': creds.client_id,
+                    'client_secret': creds.client_secret,
+                    'scopes': creds.scopes
+                }
+                return credentials
             except Exception as e:
                 st.error(f"Failed to fetch token: {e}")
+                return None
     except Exception as e:
         st.error(f"Authentication failed: {e}")
-
-    if creds:
-        credentials = {
-            'token': creds.token,
-            'refresh_token': creds.refresh_token,
-            'token_uri': creds.token_uri,
-            'client_id': creds.client_id,
-            'client_secret': creds.client_secret,
-            'scopes': creds.scopes
-        }
-        return credentials
-    else:
-        st.error("Failed to obtain credentials.")
         return None
 
 def main():
@@ -60,10 +61,12 @@ def main():
             st.write("Your access token is:")
             st.text_area("Access Token", value=credentials['token'], height=150)
 
-            # Optionally, save credentials to a file
+            # Save credentials to a file
             with open('credentials.json', 'w') as token_file:
                 json.dump(credentials, token_file)
             st.write("Credentials saved to `credentials.json`.")
+        else:
+            st.error("Failed to obtain credentials. Please try again.")
 
 if __name__ == "__main__":
     main()
