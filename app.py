@@ -2,8 +2,16 @@ import streamlit as st
 from google_auth_oauthlib.flow import InstalledAppFlow
 import json
 
-# Define the scope for accessing YouTube Data API
-SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
+# Define the scopes for accessing YouTube Data API
+SCOPES = [
+    'https://www.googleapis.com/auth/youtube',
+    'https://www.googleapis.com/auth/youtube.force-ssl',
+    'https://www.googleapis.com/auth/youtube.readonly',
+    'https://www.googleapis.com/auth/youtubepartner',
+    'https://www.googleapis.com/auth/youtubepartner-channel-audit',
+    'https://www.googleapis.com/auth/yt-analytics.readonly',
+    'https://www.googleapis.com/auth/yt-analytics-monetary.readonly'
+]
 
 def authenticate_and_get_token(client_secrets_file):
     """Authenticate the user and get the access token."""
@@ -70,3 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
