@@ -7,14 +7,11 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
 def authenticate_and_get_token(client_secrets_file):
     """Authenticate the user and get the access token."""
-    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, SCOPES)
-
+    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, SCOPES, redirect_uri="https://accesstoken-zo9us8njw6cs8u7qz9n7at.streamlit.app/")
+    
     creds = None
     try:
-        creds = flow.run_local_server(port=0)
-    except Exception as e:
-        st.error(f"Automatic authentication failed: {e}")
-        # Provide manual authentication URL and code input
+        # Automatic authentication is not suitable for cloud environments like Streamlit Cloud
         auth_url, _ = flow.authorization_url(access_type='offline')
         st.write("Please go to this URL to authorize the application:")
         st.write(f"[Authorize Here]({auth_url})")
@@ -24,6 +21,8 @@ def authenticate_and_get_token(client_secrets_file):
                 creds = flow.fetch_token(code=auth_code)
             except Exception as e:
                 st.error(f"Failed to fetch token: {e}")
+    except Exception as e:
+        st.error(f"Authentication failed: {e}")
 
     if creds:
         credentials = {
@@ -52,6 +51,7 @@ def main():
 
         st.write("File uploaded successfully! Starting authentication...")
 
+        # Authenticate and get the token
         credentials = authenticate_and_get_token("client_secrets.json")
         
         if credentials:
@@ -59,6 +59,7 @@ def main():
             st.write("Your access token is:")
             st.text_area("Access Token", value=credentials['token'], height=150)
 
+            # Optionally, save credentials to a file
             with open('credentials.json', 'w') as token_file:
                 json.dump(credentials, token_file)
             st.write("Credentials saved to `credentials.json`.")
